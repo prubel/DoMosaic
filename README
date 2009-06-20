@@ -1,0 +1,118 @@
+# Name:: DoMosaic 
+# Description:: Generates a plan to make a mural out of dominos
+# Author:: Paul Rubel (paul@rubels.net)
+# Release:: 1.0
+# Homepage:: http://rubels.net/dominos
+# Date::  June 2008
+# License:: You can redistribute it and/or modify it under the same term as Ruby. 
+#           Copyright (c) 2008  Paul Rubel
+#
+#     THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+#     IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+#     PURPOSE.
+#
+
+
+Requirements:
+-------------
+ ruby
+ imagemagick 
+ rmagick ruby gem # gem install rmagick
+ glpk  # http://www.gnu.org/software/glpk/, 
+       # included in newer versions cygwin
+ cygwin # if running under windows (this is relatively untested)
+ ps2pdf # if you want pdf output, to_dom.rb generates postscript.
+
+
+Usage:
+------
+* fill.rb -h 
+
+
+ Running fill.rb will generate a .mod (model) file suitable for
+ solving using glpk. An example commandline for the glpk invocation
+ is included at the top of the model file:
+
+   /* to run: glpsol --intopt --tmlim 40000 -m ./models/lincoln-h.12.mod\
+                                            -o ./models/lincoln-h.12.sol */
+
+ Note that glpk does not support the --intopt option all OSs, for
+ example 64-bit linux. If this is the case glpk will bail after
+ finding the optimal soultion, while preparing to find the integer
+ optimal solution. If --intopt is not supported the model can still be
+ solved, just don't use the --intopt option. 
+
+ Depending upon the size of your model it may take a while to get to
+ the point of solving the integer optimal problem so you will want to
+ test with a small model, 1 set, just
+ to make sure everything works together, before solving a larger
+ model.
+
+* glpk --intopt --tmlim 40000 -m ./input.mod -o output.sol
+
+Running glpk on the .mod should results in a .sol (solution) file (it
+may take a while, a LONG while, depending on the size of your model
+and your options.) For models that do not limit the orientation of the
+dominos to only horizontal or only vertical, I find that anything
+bigger than approximately 16 may not be solvable in a reasonable
+amount of time/RAM on a modern CPU as of 2008. With an all-horizontal
+or all vertical portrait I have solved 64 set problems in hours. When
+solving, you may get lucky and chance upon an optimal solution
+quickly, it's all statistics. Note that there is timelimit set on
+glpk, this will stop you run after the specified number of seconds At
+that time you may end up with a non-optimal solution or no
+solution. There does not currently appear to be a way to say solve to
+within x% of the optimal solution and then stop.
+
+* to_dom.rb -h # generates a .ps file to stdout
+
+You should be able to print this file to a postscript printer. I have
+seen some problems with the postscript generated not printing the
+first page. Turning the .ps file into a .pdf (using ps2pdf) seems to
+solve the problem.
+
+
+
+
+
+Requests
+--------- 
+
+If you use this program to make a domino picture I
+would love to see a picture. Send me an email paul@rubels.net. 
+
+
+
+
+File responsibilities: 
+----------------------
+
+  fill.rb - makes a model
+
+  create_data.rb - used by fill.rb
+
+  to_dom.rb - take a solution and turns it into ps
+ 
+  domino_options.rb - option parsing code
+ 
+
+Notes: 
+-------
+
+glpk using a single core seems faster than symphony, another ILP
+solver.
+
+The Gnu MathProg, used in the model, is a subset of AMPL.
+
+
+How I got symphony running:
+  https://projects.coin-or.org/SYMPHONY/
+  ./configure --with-gmpl --with-glpk-lib=
+              --with-glpk-incdir[=GLPK include dir]
+
+  symphony ./configure --with-gmpl --with-glpk-lib=/usr/lib/libglpk.a
+  --with-glpk-incdir=/usr/include/ --enable-gnu-packages
+  --enable-openmp --without-cg=no --without-cp=no --without-lp=no
+  --without-tm=no
+
