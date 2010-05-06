@@ -2,7 +2,7 @@
 
 # Generate a postscript file from an input glpk solution
 #
-#           Copyright (c) 2008  Paul Rubel
+#           Copyright (c) 2008,2009,2010  Paul Rubel
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
